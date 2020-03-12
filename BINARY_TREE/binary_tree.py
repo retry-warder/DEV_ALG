@@ -17,6 +17,15 @@ class Node:
         self.left = node
         if node:
             node.parent = self
+    def high(self):
+        lh = self.left.high() if self.left else -1
+        rh = self.right.high() if self.right else -1
+        return rh + 1 if rh > lh else lh + 1
+    
+    def balance(self):
+        lh = self.left.high() if self.left else 0
+        rh = self.right.high() if self.right else 0
+        return rh - lh
 
 
 class BinaryTree:
@@ -127,11 +136,11 @@ class AVLTree(BinaryTree):
 
     def __rightLeftRotate(self, x):
         x.setRight(self.__leftRotate(x.right))
-        return self.rightRotate(x)
+        return self.__rightRotate(x)
 
     def __leftRightRotate(self, x):
         x.setLeft(self.__rightRotate(x.left))
-        return self.leftRotate(x)
+        return self.__leftRotate(x)
 
     def __balance(self, node):
         if node.left:
