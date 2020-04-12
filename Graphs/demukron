@@ -1,0 +1,26 @@
+class Graph:
+    def __init__(self, g):
+        self._graf = g
+
+    def tsort(self):
+        vdegrees = [0] * len(self._graf)
+        for adjs in self._graf:
+            for adj_id in adjs:
+                vdegrees[adj_id] += 1
+
+        level = [v_id for v_id, ind in enumerate(vdegrees) if ind == 0]
+        result = [level]
+        count = len(level)
+        while count < len(self._graf):
+            new_level = []
+            for v_id in level:
+                for adj in self._graf[v_id]:
+                    vdegrees[adj] -= 1
+                    if vdegrees[adj] == 0:
+                        new_level.append(adj)
+                        count += 1
+            if len(new_level) == 0:
+                raise ValueError("Цикл в графе")
+            result.append(new_level)
+            level = new_level
+        return result
