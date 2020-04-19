@@ -37,12 +37,13 @@ def hash_tab_delete(hash_table, key):
 
 def hash_tab_find(hash_table, key):
     i = has_func(key, hash_table.size)
-    if hash_table.data[i] is not None:
+    if hash_table.data[i] is None:
+        return None
+    else:
         for j in range(0, len(hash_table.data[i])):
             if hash_table.data[i][j].key == key:
                 return hash_table.data[i][j].value
-    else:
-        return None
+        
 
 
 if __name__ == '__main__':
