@@ -13,8 +13,8 @@ class HashTab:
 def has_func(string, max) -> int:
     num = 5381
     for char in string:
-        num = (num * 33) + ord(char)
-    return num % max
+        num = ((num * 33) + ord(char)) % max
+    return num
 
 
 def hash_tab_insert(hash_table: HashTab, key, value):
