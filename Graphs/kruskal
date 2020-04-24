@@ -1,0 +1,78 @@
+from collections import defaultdict
+
+class Graph:
+    def __init__(self, graph_dic={}):
+        self.graph_dic = graph_dic
+
+    def vertices(self):
+        vertices = []
+        for u in self.graph_dic:
+            if u not in vertices:
+                vertices.append(u)
+            for v in self.graph_dic[u]:
+                if v not in vertices:
+                    vertices.append(v)
+        return vertices
+
+    def generate_edges_weight_list(self):
+        graph = []
+        for u in self.graph_dic:
+            for v in self.graph_dic[u]:
+                for t in range(self.graph_dic[u][v]):
+                    w = self.graph_dic[u][v]
+                    edge_weight = [u, v, w]
+                    if [u, v, w] not in graph:
+                        graph.append(edge_weight)
+        return graph
+
+    def find(self, parent, vertex):
+        if parent[vertex] != vertex:
+            parent[vertex] = self.find(parent, parent[vertex])
+        return parent[vertex]
+
+    def union(self, parent, rank, x, y):
+        xroot = self.find(parent, x)
+        yroot = self.find(parent, y)
+        if rank[xroot] < rank[yroot]:
+            parent[xroot] = yroot
+        elif rank[xroot] > rank[yroot]:
+            parent[yroot] = xroot
+        else:
+            parent[yroot] = xroot
+            rank[xroot] += 1
+
+
+    def Kruskal(self):
+        result = [] 
+        i = 0  
+        e = 0 
+        graph_ = self.generate_edges_weight_list()
+        graph_ = sorted(graph_, key=lambda item: item[2])
+ 
+        parent = {}
+        rank = {}
+
+        vertices = self.vertices()
+        V = len(vertices)
+
+        for vertex in vertices:
+            parent[vertex] = vertex
+            rank[vertex] = vertex
+
+        while e < V - 1:
+            u, v, w = graph_[i]
+            i = i + 1
+            x = self.find(parent, u)
+            y = self.find(parent, v)
+
+            if x != y:
+                e = e + 1
+                result.append([u, v, w])
+                self.union(parent, rank, x, y)
+
+        outdict = defaultdict(dict)
+        for u, v, w in result:
+            outdict[u][v] = w
+
+        for u, v, weight in result:
+            print("%s -- %s == %d" % (u, v, weight))
