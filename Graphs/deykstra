@@ -1,0 +1,98 @@
+from VectorArray import VectorArray
+from SingleArray import SingleArray
+from typing import List
+from copy import deepcopy
+
+
+class Edge:
+    def __init__(self, v1Index: int, v2Index: int, weight: int):
+        self.v1Index = v1Index
+        self.v2Index = v2Index
+        self.weight = weight
+
+
+class AdjacencyVector:
+    def __init__(self, rows_count):
+        self.vector = VectorArray(rows_count)
+        for i in range(rows_count):
+            self.vector.add(VectorArray(rows_count))
+
+    def bind(self, slaveVertexIndex: int, masterVertexIndex: int):
+        self.vector.get(masterVertexIndex).add(slaveVertexIndex)
+
+
+class Vertex:
+    def __init__(self, index: int):
+        self.index = index
+        self.bindedVertexes = SingleArray()
+        self.label = float("inf")
+
+    def add_BindedVertex(self, vertex):
+        self.bindedVertexes.add(vertex)
+
+    def cls_BindedIndexes(self):
+        self.bindedVertexes = SingleArray()
+
+
+def makeVertexesArray(
+        vertexIndexes: [],
+        adjacencyVector: AdjacencyVector
+):
+    vertexes = VectorArray(len(vertexIndexes))
+
+    for masterVertexIndex, slaveVIndexesArr in enumerate(vertexIndexes):
+        masterVertex = vertexes[masterVertexIndex]
+        if masterVertex is None:
+            masterVertex = Vertex(masterVertexIndex)
+            vertexes.replace(masterVertex, masterVertexIndex)
+
+        for slaveVertexIndex in slaveVIndexesArr:
+            slaveVertex = vertexes[slaveVertexIndex]
+            if slaveVertex is None:
+                slaveVertex = Vertex(slaveVertexIndex)
+                vertexes.replace(slaveVertex, slaveVertexIndex)
+            masterVertex.addBindedVertex(slaveVertex)
+            adjacencyVector.bind(slaveVertex.index, masterVertex.index)
+    vertexes.clear_not_used_memory()
+
+    return vertexes
+
+
+def deykstra(vertexIndexes: [], edges: List[List[Edge]], initialVertexIndex: int = 0):
+    adjacencyVector = AdjacencyVector(len(vertexIndexes))
+    vertexes = makeVertexesArray(vertexIndexes, adjacencyVector)
+
+    labels = {}
+    for rowVector in adjacencyVector.vector:
+        for vertexIndex in rowVector:
+            if vertexIndex is not None:
+                labels[vertexIndex] = float('inf')
+    labels[initialVertexIndex] = 0
+
+    result = {}
+
+    while len(labels) > 0:
+        minLabel = min(labels, key=labels.get)
+        vertex = vertexes[minLabel]
+        label = labels[vertex.index]
+
+        for edge in edges[minLabel]:
+            if edge.v2Index not in labels:
+                continue
+            pathToV2Weight = label + edge.weight
+            if pathToV2Weight < labels[edge.v2Index]:
+                labels[edge.v2Index] = pathToV2Weight
+                if edge.v2Index not in result:
+                    result[edge.v2Index] = {
+                        'path': [],
+                        'weight': 0
+                    }
+                result[edge.v2Index]['weight'] = pathToV2Weight
+
+                if vertex.index in result.keys():
+                    result[edge.v2Index]['path'] = deepcopy(result[vertex.index]['path'])
+
+                result[edge.v2Index]['path'].append(edge)
+        del labels[vertex.index]
+
+    return result
