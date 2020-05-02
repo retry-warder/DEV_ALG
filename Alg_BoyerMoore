@@ -1,0 +1,51 @@
+class Alg_BoyerMoore:
+    def __init__(self, text, pattern: str):
+        self.tab = [i for i in list(set(pattern)) if i]
+        self.text = text
+        self.pattern = pattern
+
+    def _preprocessed(self, pattern: str):
+        lp = len(pattern)
+        table = {}
+
+        for i in range(len(self.tab)):
+            table[i] = lp
+
+        for i in range(lp - 1):
+            alphabetIndex = self.tab.index(pattern[i])
+            res = lp - 1 - i
+            table[alphabetIndex] = res
+
+        return table
+
+    def search(self):
+        lp = len(self.pattern)
+        lt = len(self.text)
+        matches = []
+        preprocessed = self._preprocessed(self.pattern)
+
+        shift = 0
+        while shift < lt - lp + 1:
+            j = lp - 1
+            decreased = False
+            while j >= 0 and self.text[shift + j] == self.pattern[j]:
+                j -= 1
+                decreased = True
+            if j <= 0 and decreased:
+                matches.append(shift)
+                shift += 1
+            else:
+                index = self._TabIndex(self.text[shift + j], preprocessed)
+                shift += preprocessed[index] if index in preprocessed else index
+        return " ".join("{0}".format(n) for n in matches)
+
+    def _TabIndex(self, char, preprocessed):
+        if char not in self.tab:
+            return max(preprocessed.values())
+        return self.tab.index(char)
+
+if __name__ == '__main__':
+    Alg = Alg_BoyerMoore("TRESOSRTYTR","SOS")
+    print(Alg.search())
+    Alg = Alg_BoyerMoore("12238393EVGYYUIIII","EVG")
+    print(Alg.search())    
