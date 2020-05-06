@@ -4,6 +4,16 @@ class Alg_BoyerMoore:
         self.text = text
         self.pattern = pattern
 
+    def match_length(self, S, idx1, idx2):
+        if idx1 == idx2:
+            return len(S) - idx1
+        match_count = 0
+        while idx1 < len(S) and idx2 < len(S) and S[idx1] == S[idx2]:
+            match_count += 1
+            idx1 += 1
+            idx2 += 1
+        return match_count
+
     def _preprocessed(self, pattern: str):
         lp = len(pattern)
         table = {}
@@ -18,34 +28,97 @@ class Alg_BoyerMoore:
 
         return table
 
+
+    def fundamental_preprocess(self, S):
+        if len(S) == 0:
+            return []
+        if len(S) == 1:
+            return [1]
+        z = [0 for x in S]
+        z[0] = len(S)
+        z[1] = self.match_length(S, 0, 1)
+        for i in range(2, 1 + z[1]):
+            z[i] = z[1] - i + 1
+        l = 0
+        r = 0
+        for i in range(2 + z[1], len(S)):
+            if i <= r:
+                k = i - l
+                b = z[k]
+                a = r - i + 1
+                if b < a:
+                    z[i] = b
+                else:
+                    z[i] = a + self.match_length(S, a, r + 1)
+                    l = i
+                    r = i + z[i] - 1
+            else:
+                z[i] = self.match_length(S, 0, i)
+                if z[i] > 0:
+                    l = i
+                    r = i + z[i] - 1
+        return z
+
+    def _suffix_table(self, S):
+        L = [-1 for c in S]
+        N = self.fundamental_preprocess(S[::-1])
+        N.reverse()
+        for j in range(0, len(S) - 1):
+            i = len(S) - N[j]
+            if i != len(S):
+                L[i] = j
+        return L
+
+    def _shift_table(self, S):
+        F = [0 for c in S]
+        Z = self.fundamental_preprocess(S)
+        longest = 0
+        for i, zv in enumerate(reversed(Z)):
+            longest = max(zv, longest) if zv == i + 1 else longest
+            F[-i - 1] = longest
+        return F
+
     def search(self):
-        lp = len(self.pattern)
+        lp = len(self.pattern) - 1
         lt = len(self.text)
         matches = []
-        preprocessed = self._preprocessed(self.pattern)
 
-        shift = 0
-        while shift < lt - lp + 1:
-            j = lp - 1
-            decreased = False
-            while j >= 0 and self.text[shift + j] == self.pattern[j]:
-                j -= 1
-                decreased = True
-            if j <= 0 and decreased:
-                matches.append(shift)
-                shift += 1
+        preprocessed = self._preprocessed(self.pattern)
+        suff_table = self._suffix_table(self.pattern)
+        shift_table = self._shift_table(self.pattern)
+
+        previous_k = -1
+        while lp < lt:
+            i = len(self.pattern) - 1
+            h = lp
+            while i >= 0 and h > previous_k and self.pattern[i] == self.text[h]:
+                i -= 1
+                h -= 1
+            if i == -1 or h == previous_k:
+                matches.append(lp - len(self.pattern) + 1)
+                lp += len(self.pattern) - shift_table[1] if len(self.pattern) > 1 else 1
             else:
-                index = self._TabIndex(self.text[shift + j], preprocessed)
-                shift += preprocessed[index] if index in preprocessed else index
-        return " ".join("{0}".format(n) for n in matches)
+                char_shift = i - self._TabIndex(self.text[h],preprocessed)
+                if i + 1 == len(self.pattern):
+                    suffix_shift = 1
+                elif suff_table[i + 1] == -1:
+                    suffix_shift = len(self.pattern) - shift_table[i + 1]
+                else:
+                    suffix_shift = len(self.pattern) - suff_table[i + 1]
+                shift = max(char_shift, suffix_shift)
+                previous_k = lp if shift >= i + 1 else previous_k
+                lp += shift
+        return matches
 
     def _TabIndex(self, char, preprocessed):
         if char not in self.tab:
             return max(preprocessed.values())
         return self.tab.index(char)
 
+
+
 if __name__ == '__main__':
-    Alg = Alg_BoyerMoore("TRESOSRTYTR","SOS")
+    Alg = Alg_BoyerMoore("112ESDWEEDDASDDD", "SDD")
     print(Alg.search())
-    Alg = Alg_BoyerMoore("12238393EVGYYUIIII","EVG")
-    print(Alg.search())    
+    Alg = Alg_BoyerMoore("DFFЫЫЫЫSASEVGYYUIIEVGII", "EVG")
+    print(Alg.search())
