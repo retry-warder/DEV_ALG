@@ -1,89 +1,100 @@
-def encode(text):
-    res = []
-    text += '\0'
-    k = text[0]
-    i = 1
-    for char in text[1:]:
-        if char != k:
-            res.append(str(i) + k)
-            k = char
-            i = 0
-        i += 1
-    return ''.join(res)
+class RLE_COMPRESS:
+    def __init__(self, text):
+        self.text = text
+        print(self.text)
+        print('******************************************')
+        print(self.encode())
+        print(self.decode())
+        print('******************************************')
+        print(self.encode_upd())
+        print(self.decode_upd())
 
-
-def encode_upd(text):
-    res = []
-    text += '\0'
-    l = text[0]
-    i = 1
-
-    s_simbol = []
-
-    for s in text[1:]:
-        if s == l:
-            i += 1
-            continue
-        elif i > 1:
-            s_simbol_l = len(s_simbol)
-            if s_simbol_l > 0:
-                res.append(
-                    (str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
-                s_simbol = []
-            res.append(str(i) + l)
-        elif i == 1:
-            s_simbol.append(l)
-        l = s
+    def encode(self):
+        res = []
+        self.text += '\0'
+        k = self.text[0]
         i = 1
-    s_simbol_l = len(s_simbol)
-    if s_simbol_l > 0:
-        res.append((str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
-    return ''.join(res)
+        for char in self.text[1:]:
+            if char != k:
+                res.append(str(i) + k)
+                k = char
+                i = 0
+            i += 1
+        return ''.join(res)
 
 
-def decode(text):
-    res = ''
-    l = None
-    for c in text:
-        if c.isdigit():
-            if l is not None and l.isdigit():
-                res += c * int(l)
-                l = None
+    def encode_upd(self):
+        res = []
+        self.text += '\0'
+        l = self.text[0]
+        i = 1
+
+        s_simbol = []
+
+        for s in self.text[1:]:
+            if s == l:
+                i += 1
                 continue
-            l = c
-        elif l is not None:
-            res += c * int(l)
-            l = None
-    return res
+            elif i > 1:
+                s_simbol_l = len(s_simbol)
+                if s_simbol_l > 0:
+                    res.append(
+                        (str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
+                    s_simbol = []
+                res.append(str(i) + l)
+            elif i == 1:
+                s_simbol.append(l)
+            l = s
+            i = 1
+        s_simbol_l = len(s_simbol)
+        if s_simbol_l > 0:
+            res.append((str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
+        return ''.join(res)
 
 
-def decode_upd(text):
-    res = ''
-    l = None
-    l_c_b_d = False
-    _d_s = ''
-    _char_flag = False
-    for c in text:
-        if c.isdigit():
-            if _char_flag is True and l_c_b_d:
-                _char_flag = False
-                l = None
-                l_c_b_d = False
-            if _d_s == '-':
-                _d_s = ''
-                l = '1'
-                _char_flag = True
-            elif l is not None and l.isdigit():
-                res += c * int(l)
-                l = '1'
-                continue
-            else:
+    def decode(self):
+        res = ''
+        l = None
+        for c in self.text:
+            if c.isdigit():
+                if l is not None and l.isdigit():
+                    res += c * int(l)
+                    l = None
+                    continue
                 l = c
-        elif c == '-':
-            _d_s = c
-        elif l is not None:
-            res += c * int(l)
-            l_c_b_d = True
-            if not _char_flag:
+            elif l is not None:
+                res += c * int(l)
                 l = None
-    return res
+        return res
+
+
+    def decode_upd(self):
+        res = ''
+        l = None
+        l_c_b_d = False
+        _d_s = ''
+        _char_flag = False
+        for c in self.text:
+            if c.isdigit():
+                if _char_flag is True and l_c_b_d:
+                    _char_flag = False
+                    l = None
+                    l_c_b_d = False
+                if _d_s == '-':
+                    _d_s = ''
+                    l = '1'
+                    _char_flag = True
+                elif l is not None and l.isdigit():
+                    res += c * int(l)
+                    l = '1'
+                    continue
+                else:
+                    l = c
+            elif c == '-':
+                _d_s = c
+            elif l is not None:
+                res += c * int(l)
+                l_c_b_d = True
+                if not _char_flag:
+                    l = None
+        return res
