@@ -1,0 +1,66 @@
+import hashlib
+import numpy as np
+
+class Bloom:
+    def __init__(self, m, k, hash_fun):
+        self.m = m
+        self.vector = [0] * m
+        self.k = k
+        self.hash_fun = hash_fun
+
+    def calcHash(self, key, i):
+        """ 'i' works as a seed """
+        return self.hash_fun(key + str(i))
+
+    def insert(self, key):
+        """ insert the key to the database """
+        for i in range(self.k):
+            self.vector[self.calcHash(key, i) % self.m] = 1
+
+    def contains(self, key):
+        """ check if key is contained in the database
+        using the filter mechanism """
+        for i in range(self.k):
+            if self.vector[self.calcHash(key, i) % self.m] == 0:
+                return False  # the key doesn't exist
+        return True  # the key can be in the data set
+
+
+def hash_f(x):
+    # we'll use sha256 just for this example
+    h = hashlib.sha256(x.encode())
+    return int(h.hexdigest(), base=16)
+
+
+bloom = Bloom(100, 10, hash_f)
+
+block_nom_dog = []
+for i in range(1000):
+    s = 'ГВС-НК-' + str(np.random.randint(0, 10000)).rjust(10,'0')
+    if not s in block_nom_dog:
+        block_nom_dog.append(s)
+print(block_nom_dog)
+
+for item in block_nom_dog:
+    bloom.insert(item)
+
+nom_dog = []
+for i in range(100000):
+    s = 'ГВС-НК-' + str(np.random.randint(0, 10000)).rjust(10,'0')
+    if not s in nom_dog:
+        nom_dog.append(s)
+
+n_total_positives = 0
+n_false_positives = 0
+for word in nom_dog:
+    if bloom.contains(word):
+        n_total_positives += 1
+        if word in block_nom_dog:
+            n_false_positives += 1
+            print("'{}' is a false positive!".format(word))
+        else:
+            print("'{}' is present (not a false positive)!".format(word))
+    else:
+        print("'{}' is definitely not present!".format(word))
+
+print("Rate of false positives: {}%".format(n_false_positives / n_total_positives * 100))
