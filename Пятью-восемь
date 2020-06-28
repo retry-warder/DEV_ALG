@@ -1,0 +1,14 @@
+class d_prog_3:
+    def __init__(self):
+        n = int(input('SIZE:'))
+        a = 1
+        c = 0
+        for i in range(2,n+1):
+            a1 = a + c
+            c1 = a
+            a = a1
+            c = c1
+        print(a+a+c+c)
+
+if __name__ == '__main__':
+    g = d_prog_3()
