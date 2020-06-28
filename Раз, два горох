@@ -1,0 +1,24 @@
+class g_prog_1:
+    def __init__(self, input_str: str):
+        _input_str = input_str.replace('+', '/').split('/')
+        print(_input_str)
+        a = int(_input_str[0])
+        b = int(_input_str[1])
+        c = int(_input_str[2])
+        d = int(_input_str[3])
+        x = a*d + b*c
+        y = b*d
+        print(x.__str__() + '/' + y.__str__())
+        gcd = self.GCD(x,y)
+        x /= gcd
+        y /= gcd
+        print(x.__str__() + '/' + y.__str__())
+
+    def GCD(self, a: int, b: int):
+        if b == 0:
+            return a
+        else:
+            return self.GCD(b, a % b)
+
+if __name__ == '__main__':
+    g = g_prog_1('1/3 + 1/3')
