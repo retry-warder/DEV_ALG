@@ -1,0 +1,17 @@
+class d_prog_2:
+    def __init__(self):
+        n = int(input('SIZE:'))
+        d = 10
+        m = [[0 for x in range(d)] for y in range(d)]
+        for i in range(n):
+            for j in range(i):
+                m[i][j] = int(input('NUM:'))
+        for i in range(n - 2, 0, -1):
+            for j in range(i):
+                m[i][j] += max(m[i + 1][j], m[i + 1][j + 1])
+        print(m[0][0])
+        return 0
+
+
+if __name__ == '__main__':
+    g = d_prog_2()
