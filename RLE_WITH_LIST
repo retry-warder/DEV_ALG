@@ -1,0 +1,104 @@
+class RLE_COMPRESS:
+    def __init__(self, text):
+        self.text = text
+        self.text_1 = []
+        self.text_2 = ''
+        print(self.text)
+        print('******************************************')
+        print(self.rle_list_print(self.encode()))
+        print(self.rle_list_print(self.decode()))
+
+
+    def rle_list_print(self, a):
+        result = []
+        for item in a:
+            if (item[1] == 1):
+                result.append(item[0])
+            else:
+                result.append(str(item[1]) + item[0])
+        return "".join(result)
+
+    def encode(self):
+        count = 1
+        for x, item in enumerate(self.text):
+            if x == 0:
+                continue
+            elif item == self.text[x - 1]:
+                count += 1
+            else:
+                self.text_1.append((self.text[x - 1], count))
+                count = 1
+        self.text_1.append((self.text[len(self.text) - 1], count))
+        return self.text_1
+
+
+    def encode_upd(self):
+        res = []
+        self.text += '\0'
+        l = self.text[0]
+        i = 1
+
+        s_simbol = []
+
+        for s in self.text[1:]:
+            if s == l:
+                i += 1
+                continue
+            elif i > 1:
+                s_simbol_l = len(s_simbol)
+                if s_simbol_l > 0:
+                    res.append(
+                        (str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
+                    s_simbol = []
+                res.append(str(i) + l)
+            elif i == 1:
+                s_simbol.append(l)
+            l = s
+            i = 1
+        s_simbol_l = len(s_simbol)
+        if s_simbol_l > 0:
+            res.append((str(-s_simbol_l) if s_simbol_l > 1 else str(s_simbol_l)) + ''.join(s_simbol))
+        self.text_2 = ''.join(res)
+        return self.text_2
+
+    def decode(self):
+        res = []
+        for item in self.text_1:
+            res.append(item[0] * item[1])
+        return res
+
+
+    def decode_upd(self):
+        res = ''
+        l = None
+        l_c_b_d = False
+        _d_s = ''
+        _char_flag = False
+        for c in self.text_2:
+            if c.isdigit():
+                if _char_flag is True and l_c_b_d:
+                    _char_flag = False
+                    l = None
+                    l_c_b_d = False
+                if _d_s == '-':
+                    _d_s = ''
+                    l = '1'
+                    _char_flag = True
+                elif l is not None and l.isdigit():
+                    res += c * int(l)
+                    l = '1'
+                    continue
+                else:
+                    l = c
+            elif c == '-':
+                _d_s = c
+            elif l is not None:
+                res += c * int(l)
+                l_c_b_d = True
+                if not _char_flag:
+                    l = None
+        return res
+
+
+if __name__ == "__main__":
+    RLE = RLE_COMPRESS('122223344kkkkkkuuuuu')
