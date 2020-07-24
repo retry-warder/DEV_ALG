@@ -1,0 +1,63 @@
+import numpy as np
+
+
+class SARAJ:
+    def __init__(self, n: int, m: int, t: int):
+        self.n = n #длина
+        self.m = m #ширина
+        self.t = t #деревья
+        self.p = [[1 for x in range(self.m)] for y in range(self.n)]
+        print("###НАЧАЛЬНЫЕ ДАННЫЕ###")
+        for x in range(self.n):
+            for y in range(0, self.m, np.random.randint(1, m)):
+                if self.t > 0:
+                    self.p[x][y] = np.random.randint(0, 2)
+                    if self.p[x][y] == 0:
+                        self.t -=1
+        for x in range(self.n):
+            s = ""
+            for y in range(self.m):
+                if self.p[x][y] == 0:
+                    s += "|#"
+                else:
+                    s += "|."
+            print(s)
+        print("###МАЛЕНЬКИЙ САРАЙ###")
+        k = [0 for x in range(self.m)]
+        for x in range(self.n):
+            s = ""
+            for y in range(self.m):
+                if self.p[x][y] == 0:
+                    s += "|0"
+                    k[y] = 0
+                else:
+                    k[y] += 1
+                    s += "|" + str(k[y])
+            print(s)
+        print("###МАКСИМАЛЬНАЯ ДЛИНА ДЛЯ КАЖДОЙ КЛЕТКИ###")
+        self.max_l = [["#" for x in range(self.m)] for y in range(self.n)]
+        ky = [0 for x in range(self.m)]
+        kx = [0 for x in range(self.n)]
+        for x in range(self.n):
+            for y in range(self.m):
+                if self.p[x][y] == 0:
+                    for i in range(kx[y],x):
+                        self.max_l[i][y] = str(ky[y])
+                    kx[y] = x+1
+                    ky[y] = 0
+                else:
+                    ky[y] += 1
+        for y in range(self.m):
+            for i in range(kx[y],self.n):
+                self.max_l[i][y] = str(ky[y])
+
+        for x in range(self.n):
+            s = ""
+            for y in range(self.m):
+                s += "|" + str(self.max_l[x][y])
+            print(s)
+
+
+
+if __name__ == '__main__':
+    g = SARAJ(10, 10, 23)
